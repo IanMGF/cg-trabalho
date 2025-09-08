@@ -1,7 +1,8 @@
 #include <GL/freeglut_std.h>
 #include <GL/glut.h>
 #include "vec3.cpp"
-#include <cmath>
+
+#define G 6.67430e-11
 
 class Body {
     public:
@@ -19,7 +20,7 @@ class Body {
             this->color = color;
 
             this->position = Vec3(0, 0, distance);
-            if (distance != 0) this->velocity = Vec3(sqrt(10*mass/distance), 0, 0);
+            if (distance != 0) this->velocity = Vec3(sqrt(G * 4E+11 / distance), 0, 0);
             else this->velocity = Vec3(0, 0, 0);
         }
 

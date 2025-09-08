@@ -5,7 +5,9 @@
 #include <cmath>
 #include "body.cpp"
 
-#define DELTA 1000
+#define G 6.67430e-11
+#define DELTA 10
+#define FACTOR 100000
 
 GLfloat angle, fAspect, largura, altura, xcamera, ycamera, zcamera;
 
@@ -47,15 +49,16 @@ void update(int _) {
     for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10; j++) {
             if (i != j) {
-                float acc_factor = bodies[i].mass * bodies[j].mass / pow((bodies[i].position - bodies[j].position).length(), 2);
+                float acc_factor = G * bodies[j].mass / pow((bodies[i].position - bodies[j].position).length(), 2);
                 Vec3 acc = (bodies[j].position - bodies[i].position).unitary() * acc_factor;
-                bodies[i].velocity = bodies[i].velocity + acc * DELTA * 0.001;
+                bodies[i].velocity = bodies[i].velocity + acc * DELTA * FACTOR * 0.001;
             }
         }
-
-        bodies[i].position = bodies[i].position + bodies[i].velocity; // * DELTA * 0.001 * 0;
-        
-        Vec3 pos_delta = bodies[i].velocity * DELTA * 0.001 * 0;
+    
+        bodies[i].position = bodies[i].position + bodies[i].velocity * DELTA * FACTOR * 0.001;
+        // std::cout << "BODY " << i << std::endl;
+        // std::cout << "POSITION: " << "(" << bodies[i].position.x << ", " << bodies[i].position.y << ", " << bodies[i].position.z << ")" << std::endl;
+        // std::cout << "VELOCITY: " << "(" << bodies[i].velocity.x << ", " << bodies[i].velocity.y << ", " << bodies[i].velocity.z << ")" << std::endl;
     }
     
     glutPostRedisplay();
