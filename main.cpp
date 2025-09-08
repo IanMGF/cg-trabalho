@@ -1,15 +1,13 @@
-//*****************************************************
-//
-// pratica4.cpp
-// Visualização 3D
-// 
-//*****************************************************
+#include <GL/freeglut_std.h>
 #include <GL/glut.h>
 #include <iostream>
 GLfloat angle, fAspect, largura, altura, xcamera, ycamera, zcamera;
 
-void Desenha(void)
-{
+void update(int _) {
+
+}
+
+void draw(void) {
 	//glClear(GL_COLOR_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -17,8 +15,7 @@ void Desenha(void)
     glColor3f(1.0f, 0.5f, 0.0f);
     glPushMatrix();
         glTranslated(0, 0, 0);
-        glutWireTeapot(50.0f);  
-	    //glColor3f(0.0f, 0.5f, 0.5f); glutWireSphere(50, 20, 20); glColor3f(0.0f, 0.0f, 1.0f); glutWireCube(50.0);
+        glutWireSphere(30.0, 20, 20);
     glPopMatrix();
 /*
 	// Desenha um cubo utilizando primitivas
@@ -55,7 +52,7 @@ glColor3f(0.0f, 1.0f, 0.0f);
 		glVertex3f(-40.0, -40.0, 0.0);
 		glVertex3f(-40.0, -40.0, 80.0);
 	glEnd();
-	
+
 	glColor3f(0.0f, 1.0f, 0.0f);
 	glBegin(GL_QUADS);			// Face lateral direita
 		glNormal3f(1.0, 0.0, 0.0);	// Normal da face
@@ -76,12 +73,13 @@ glColor3f(0.0f, 1.0f, 0.0f);
 	glutSwapBuffers();
 }
 
-void Inicializa(void)
+void setup(void)
 {
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    // Slightly blue tone
+	glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
 
-    glEnable(GL_DEPTH_TEST);   //ativa o zBuffer
-    
+    glEnable(GL_DEPTH_TEST);
+
 	angle = 45;
 }
 
@@ -106,7 +104,7 @@ void EspecificaParametrosVisualizacao(void)
               0, 1, 0);         // vetor UP da câmera
 }
 
-// Função callback chamada quando o tamanho da janela é alterado 
+// Função callback chamada quando o tamanho da janela é alterado
 void AlteraTamanhoJanela(GLint largura, GLint altura)
 {
 	// Para previnir uma divisão por zero
@@ -125,20 +123,20 @@ void AlteraTamanhoJanela(GLint largura, GLint altura)
 void TeclasEspeciais(int key, int x, int y)
 {
 	if (key == GLUT_KEY_UP) {
-		ycamera += 10;  
+		ycamera += 10;
 	}
 	if (key == GLUT_KEY_DOWN) {
-		ycamera -= 10;  
+		ycamera -= 10;
 	}
 	/*
 	if (key == GLUT_KEY_RIGHT) {
-		 
+
 	}
 	if (key == GLUT_KEY_LEFT) {
-		  
+
 	}
 	*/
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer  
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer
     EspecificaParametrosVisualizacao();
 	glutPostRedisplay();
 }
@@ -156,9 +154,9 @@ void GerenciaTeclado(unsigned char key, int x, int y) {
 
         case 's':
 
-*/		
+*/
 	}
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer  
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer
     EspecificaParametrosVisualizacao();
 	glutPostRedisplay();
 }
@@ -168,12 +166,12 @@ void GerenciaTeclado(unsigned char key, int x, int y) {
 void GerenciaMouse(int button, int state, int x, int y)
 {
 	if (button == GLUT_LEFT_BUTTON){
-	
+
 	}
 	if (button == GLUT_RIGHT_BUTTON){
-	
+
 	}
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer  
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer
     EspecificaParametrosVisualizacao();
 	glutPostRedisplay();
 }
@@ -183,7 +181,7 @@ int main(int argc, char** argv)
     glutInit(&argc, argv);
 
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);  //GLUT_DOUBLE trabalha com dois buffers: um para renderização e outro para exibição
-	
+
     glutInitWindowPosition(700,100);
     largura = 600;
     altura = 500;
@@ -191,14 +189,17 @@ int main(int argc, char** argv)
 	fAspect = (GLfloat)largura / (GLfloat)altura;
     ycamera = 50;
 	angle = 45;
-    glutCreateWindow("Aula Pratica 4"); 
+    glutCreateWindow("Sistema Solar");
 
-	glutDisplayFunc(Desenha);
+    glutTimerFunc(100, update, 0);
+	glutDisplayFunc(draw);
 	glutReshapeFunc(AlteraTamanhoJanela); // Função para ajustar o tamanho da tela
     //glutMouseFunc(GerenciaMouse);
     glutKeyboardFunc(GerenciaTeclado); // Define qual funcao gerencia o comportamento do teclado
     glutSpecialFunc(TeclasEspeciais); // Define qual funcao gerencia as teclas especiais
-	Inicializa();
+
+    // Start
+    setup();
 	glutMainLoop();
 
 }
