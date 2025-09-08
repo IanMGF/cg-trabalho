@@ -19,7 +19,8 @@ class Body {
             this->color = color;
 
             this->position = Vec3(0, 0, distance);
-            this->velocity = Vec3(sqrt(10*mass/distance), 0, 0);
+            if (distance != 0) this->velocity = Vec3(sqrt(10*mass/distance), 0, 0);
+            else this->velocity = Vec3(0, 0, 0);
         }
 
         void draw() {
