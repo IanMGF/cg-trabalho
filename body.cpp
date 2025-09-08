@@ -1,6 +1,7 @@
 #include <GL/freeglut_std.h>
 #include <GL/glut.h>
 #include "vec3.cpp"
+#include <cmath>
 
 class Body {
     private:
@@ -8,23 +9,22 @@ class Body {
         float distance;
         float mass;
         Vec3 position;
-        Vec3 speed;
+        Vec3 velocity;
+        Vec3 color;
 
     public:
-        Body(float radius, float distance, float mass) {
+        Body(float radius, float distance, float mass, Vec3 color) {
             this->radius = radius;
             this->distance = distance;
             this->mass = mass;
+            this->color = color;
 
-            this->position = new Vec3(0, 0, distance);
-        }
-
-        void math_update(){
-
+            this->position = Vec3(0, 0, distance);
+            this->velocity = Vec3(sqrt(10*mass/distance), 0, 0);
         }
 
         void draw() {
-            glColor3f(0.0f, 1.0f, 0.0f);
+            glColor3f(color.x, color.y, color.z);
             glPushMatrix();
             glTranslatef(distance, 0, 0);
             glutSolidSphere(radius, 20, 20);
