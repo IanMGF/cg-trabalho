@@ -49,7 +49,8 @@ void update(int _) {
             if (i != j) {
                 float acc_factor = bodies[i].mass * bodies[j].mass / pow((bodies[i].position - bodies[j].position).length(), 2);
                 Vec3 acc = (bodies[j].position - bodies[i].position).unitary() * acc_factor;
-                bodies[i].velocity = bodies[i].velocity + acc * (1000.0 / DELTA);
+                bodies[i].velocity = bodies[i].velocity + acc * DELTA * 0.001;
+                bodies[i].position = bodies[i].position + bodies[i].velocity * DELTA * 0.001;
             }
         }
 
@@ -62,17 +63,14 @@ void draw(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Desenha objetos 3D (wire-frame)
-    glColor3f(1.0f, 0.5f, 0.0f);
-    glPushMatrix();
-        glTranslated(0, 0, 0);
-        glutWireSphere(30.0, 20, 20);
-    glPopMatrix();
-
-    glColor3f(1.0, 0.1, 0.1);
-    glPushMatrix();
-        glTranslated(50, 0, 0);
-        glutWireSphere(20.0, 20, 20);
-    glPopMatrix();
+	for (Body body : bodies) {
+	    glColor3f(body.color.x, body.color.y, body.color.z);
+		glPushMatrix();
+			glTranslated(body.position.x, body.position.y, body.position.z);
+			glutWireSphere(body.radius, 20, 20);
+		glPopMatrix();
+	}
+	
 	glutSwapBuffers();
 }
 
@@ -87,14 +85,14 @@ void setup(void)
 }
 
 // Função usada para especificar o volume de visualização
-void EspecificaParametrosVisualizacao(void)
+void view_setup(void)
 {
 	// Especifica sistema de coordenadas de projeção
 	glMatrixMode(GL_PROJECTION);
 	// Inicializa sistema de coordenadas de projeção
 	glLoadIdentity();
 	// Especifica a projeção perspectiva
-	gluPerspective(angle, fAspect, 0.01, 1000);
+	gluPerspective(angle, fAspect, 0.01, 100000);
 
 	// Especifica sistema de coordenadas do modelo
 	glMatrixMode(GL_MODELVIEW);
@@ -102,13 +100,13 @@ void EspecificaParametrosVisualizacao(void)
 	glLoadIdentity();
 
 	// Especifica posição do observador e do alvo
-	gluLookAt(50, ycamera, 300,  // posição da câmera
+	gluLookAt(0, 40000, 0,  // posição da câmera
               0, 0, 0,          // posição do alvo
-              0, 1, 0);         // vetor UP da câmera
+              0, 0, 1);         // vetor UP da câmera
 }
 
 // Função callback chamada quando o tamanho da janela é alterado
-void AlteraTamanhoJanela(GLint largura, GLint altura)
+void window_change_callback(GLint largura, GLint altura)
 {
 	// Para previnir uma divisão por zero
 	if (altura == 0) altura = 1;
@@ -119,7 +117,7 @@ void AlteraTamanhoJanela(GLint largura, GLint altura)
 	// Calcula a correção de aspecto
 	fAspect = (GLfloat)largura / (GLfloat)altura;
 
-	EspecificaParametrosVisualizacao();
+	view_setup();
 }
 
 // Função callback chamada para gerenciar teclas especiais
@@ -140,7 +138,7 @@ void TeclasEspeciais(int key, int x, int y)
 	}
 	*/
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer
-    EspecificaParametrosVisualizacao();
+    view_setup();
 	glutPostRedisplay();
 }
 // Função callback chamada para gerenciar teclado
@@ -160,7 +158,7 @@ void GerenciaTeclado(unsigned char key, int x, int y) {
 */
 	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer
-    EspecificaParametrosVisualizacao();
+    view_setup();
 	glutPostRedisplay();
 }
 
@@ -175,7 +173,7 @@ void mouse_callback(int button, int state, int x, int y)
 
 	}
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    EspecificaParametrosVisualizacao();
+    view_setup();
 	glutPostRedisplay();
 }
 
@@ -196,7 +194,7 @@ int main(int argc, char** argv)
 
     glutTimerFunc(100, update, 0);
 	glutDisplayFunc(draw);
-	glutReshapeFunc(AlteraTamanhoJanela); // Função para ajustar o tamanho da tela
+	glutReshapeFunc(window_change_callback); // Função para ajustar o tamanho da tela
     //glutMouseFunc(GerenciaMouse);
     glutKeyboardFunc(GerenciaTeclado); // Define qual funcao gerencia o comportamento do teclado
     glutSpecialFunc(TeclasEspeciais); // Define qual funcao gerencia as teclas especiais
