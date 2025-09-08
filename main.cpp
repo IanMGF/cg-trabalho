@@ -9,35 +9,35 @@
 
 GLfloat angle, fAspect, largura, altura, xcamera, ycamera, zcamera;
 
-Body bodies[11] = {
+Body bodies[10] = {
     // Sun
     Body(2000, 0, 4E+11, Vec3(1, 1, 0.4)),
 
     // Planets
 
     // Ash Twin
-    Body(169, 5000, 1.6E+6, Vec3(1, 1, 1)),
+    Body(169, 5000, 1.6E+6, Vec3(0.85, 0.31, 0.11)),
     // Ember Twin
-    Body(170, 5000, 1.6E+6, Vec3(1, 1, 1)),
+    Body(170, 5000, 1.6E+6, Vec3(0.89, 0.62, 0.29)),
 
     // Timber Heart
-    Body(254, 8600, 3E+6, Vec3(1, 1, 1)),
+    Body(254, 8600, 3E+6, Vec3(0.22, 0.38, 0.27)),
     // Attlerock
-    Body(80, 9500, 5E+7, Vec3(1, 1, 1)),
+    Body(80, 9500, 5E+7, Vec3(0.62, 0.49, 0.42)),
 
     // Brittle Hollow
-    Body(272, 11700, 3E+6, Vec3(1, 1, 1)),
+    Body(272, 11700, 3E+6, Vec3(0.31, 0.26, 0.34)),
     // Hollow's Lantern
-    Body(97, 12700, 9.1E+5, Vec3(1, 1, 1)),
+    Body(97, 12700, 9.1E+5, Vec3(1, 0.75, 0.13)),
 
     // Giant's Deep
-    Body(500, 16460, 2.2E+7, Vec3(1, 1, 1)),
+    Body(500, 16460, 2.2E+7, Vec3(0.11, 0.42, 0.27)),
 
     // Dark Bramble
-    Body(203.3, 20000, 3.25E+6, Vec3(1, 1, 1)),
+    Body(203.3, 20000, 3.25E+6, Vec3(0.3, 0.13, 0.12)),
 
     // Interloper
-    Body(83, 19000, 5.5E+6, Vec3(1, 1, 1)),
+    Body(83, 19000, 5.5E+6, Vec3(0.13, 0.48, 0.62)),
 
     // Quantum Moon
     //Body(100, 0, 0, Vec3(1, 1, 1)),
