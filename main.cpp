@@ -11,19 +11,36 @@ GLfloat angle, fAspect, largura, altura, xcamera, ycamera, zcamera;
 
 Body bodies[11] = {
     // Sun
-    Body(10, 0, 10, Vec3(1, 1, 0.4)),
+    Body(2000, 0, 4E+11, Vec3(1, 1, 0.4)),
 
     // Planets
-    Body(50, 0, 0, Vec3(1, 1, 1)),
-    Body(100, 0, 0, Vec3(1, 1, 1)),
-    Body(100, 0, 0, Vec3(1, 1, 1)),
-    Body(100, 0, 0, Vec3(1, 1, 1)),
-    Body(100, 0, 0, Vec3(1, 1, 1)),
-    Body(100, 0, 0, Vec3(1, 1, 1)),
-    Body(100, 0, 0, Vec3(1, 1, 1)),
-    Body(100, 0, 0, Vec3(1, 1, 1)),
-    Body(100, 0, 0, Vec3(1, 1, 1)),
-    Body(100, 0, 0, Vec3(1, 1, 1)),
+
+    // Ash Twin
+    Body(169, 5000, 1.6E+6, Vec3(1, 1, 1)),
+    // Ember Twin
+    Body(170, 5000, 1.6E+6, Vec3(1, 1, 1)),
+
+    // Timber Heart
+    Body(254, 8600, 3E+6, Vec3(1, 1, 1)),
+    // Attlerock
+    Body(80, 9500, 5E+7, Vec3(1, 1, 1)),
+
+    // Brittle Hollow
+    Body(272, 11700, 3E+6, Vec3(1, 1, 1)),
+    // Hollow's Lantern
+    Body(97, 12700, 9.1E+5, Vec3(1, 1, 1)),
+
+    // Giant's Deep
+    Body(500, 16460, 2.2E+7, Vec3(1, 1, 1)),
+
+    // Dark Bramble
+    Body(203.3, 20000, 3.25E+6, Vec3(1, 1, 1)),
+
+    // Interloper
+    Body(83, 19000, 5.5E+6, Vec3(1, 1, 1)),
+
+    // Quantum Moon
+    //Body(100, 0, 0, Vec3(1, 1, 1)),
 };
 
 void update(int _) {
@@ -35,7 +52,7 @@ void update(int _) {
                 bodies[i].velocity = bodies[i].velocity + acc * (1000.0 / DELTA);
             }
         }
-        
+
         bodies[i].position = bodies[i].position + bodies[i].velocity * DELTA * 0.001;
     }
 }
