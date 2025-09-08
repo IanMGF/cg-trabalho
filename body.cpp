@@ -2,7 +2,7 @@
 #include <GL/glut.h>
 #include "vec3.cpp"
 
-class Planet {
+class Body {
     private:
         float radius;
         float distance;
@@ -11,7 +11,7 @@ class Planet {
         Vec3 speed;
 
     public:
-        Planet(float radius, float distance, float mass) {
+        Body(float radius, float distance, float mass) {
             this->radius = radius;
             this->distance = distance;
             this->mass = mass;
