@@ -13,7 +13,17 @@ class Body {
         Vec3 velocity;
         Vec3 color;
 
-        Body(float radius, float distance, float mass, Vec3 color) {
+        Body(float radius, float distance, float mass, Vec3 color, Vec3 initial_velocity) {
+            this->radius = radius;
+            this->distance = distance;
+            this->mass = mass;
+            this->color = color;
+
+            this->position = Vec3(0, 0, distance);
+            this->velocity = initial_velocity;
+        }
+        
+        Body(float radius, float distance, float mass, Vec3 color){
             this->radius = radius;
             this->distance = distance;
             this->mass = mass;
