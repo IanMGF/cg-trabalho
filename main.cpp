@@ -5,11 +5,11 @@
 #include <cmath>
 #include "body.cpp"
 
-#define DELTA 1
+#define DELTA 1000
 
 GLfloat angle, fAspect, largura, altura, xcamera, ycamera, zcamera;
 
-Body bodies[11] = {
+Body bodies[10] = {
     // Sun
     Body(2000, 0, 4E+11, Vec3(1, 1, 0.4)),
 
@@ -50,12 +50,16 @@ void update(int _) {
                 float acc_factor = bodies[i].mass * bodies[j].mass / pow((bodies[i].position - bodies[j].position).length(), 2);
                 Vec3 acc = (bodies[j].position - bodies[i].position).unitary() * acc_factor;
                 bodies[i].velocity = bodies[i].velocity + acc * DELTA * 0.001;
-                bodies[i].position = bodies[i].position + bodies[i].velocity * DELTA * 0.001;
             }
         }
 
-        bodies[i].position = bodies[i].position + bodies[i].velocity * DELTA * 0.001;
+        bodies[i].position = bodies[i].position + bodies[i].velocity; // * DELTA * 0.001 * 0;
+        
+        Vec3 pos_delta = bodies[i].velocity * DELTA * 0.001 * 0;
     }
+    
+    glutPostRedisplay();
+    glutTimerFunc(DELTA, update, 0);
 }
 
 void draw(void) {
@@ -92,7 +96,7 @@ void view_setup(void)
 	// Inicializa sistema de coordenadas de projeção
 	glLoadIdentity();
 	// Especifica a projeção perspectiva
-	gluPerspective(angle, fAspect, 0.01, 100000);
+	gluPerspective(90, fAspect, 0.01, 1E+9);
 
 	// Especifica sistema de coordenadas do modelo
 	glMatrixMode(GL_MODELVIEW);
@@ -100,7 +104,7 @@ void view_setup(void)
 	glLoadIdentity();
 
 	// Especifica posição do observador e do alvo
-	gluLookAt(0, 40000, 0,  // posição da câmera
+	gluLookAt(0, 20000, 0,  // posição da câmera
               0, 0, 0,          // posição do alvo
               0, 0, 1);         // vetor UP da câmera
 }
@@ -124,10 +128,10 @@ void window_change_callback(GLint largura, GLint altura)
 void TeclasEspeciais(int key, int x, int y)
 {
 	if (key == GLUT_KEY_UP) {
-		ycamera += 10;
+		// ycamera += 10;
 	}
 	if (key == GLUT_KEY_DOWN) {
-		ycamera -= 10;
+		// ycamera -= 10;
 	}
 	/*
 	if (key == GLUT_KEY_RIGHT) {
@@ -139,7 +143,7 @@ void TeclasEspeciais(int key, int x, int y)
 	*/
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer
     view_setup();
-	glutPostRedisplay();
+	// glutPostRedisplay();
 }
 // Função callback chamada para gerenciar teclado
 void GerenciaTeclado(unsigned char key, int x, int y) {
@@ -188,11 +192,10 @@ int main(int argc, char** argv)
     altura = 500;
 	glutInitWindowSize(largura,altura);
 	fAspect = (GLfloat)largura / (GLfloat)altura;
-    ycamera = 50;
-	angle = 45;
+	angle = 90;
     glutCreateWindow("Sistema Solar");
 
-    glutTimerFunc(100, update, 0);
+    glutTimerFunc(DELTA, update, 0);
 	glutDisplayFunc(draw);
 	glutReshapeFunc(window_change_callback); // Função para ajustar o tamanho da tela
     //glutMouseFunc(GerenciaMouse);
