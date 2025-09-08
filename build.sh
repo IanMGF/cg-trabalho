@@ -1,0 +1,1 @@
+g++ main.cpp -o outer_wilds -lGL -lGLU -lglut -lm && ./outer_wilds
