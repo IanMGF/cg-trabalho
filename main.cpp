@@ -2,10 +2,42 @@
 #include <GL/gl.h>
 #include <GL/glut.h>
 #include <iostream>
+#include <cmath>
+#include "body.cpp"
+
+#define DELTA 1
+
 GLfloat angle, fAspect, largura, altura, xcamera, ycamera, zcamera;
 
-void update(int _) {
+Body bodies[11] = {
+    // Sun
+    Body(10, 0, 10, Vec3(1, 1, 0.4)),
 
+    // Planets
+    Body(50, 0, 0, Vec3(1, 1, 1)),
+    Body(100, 0, 0, Vec3(1, 1, 1)),
+    Body(100, 0, 0, Vec3(1, 1, 1)),
+    Body(100, 0, 0, Vec3(1, 1, 1)),
+    Body(100, 0, 0, Vec3(1, 1, 1)),
+    Body(100, 0, 0, Vec3(1, 1, 1)),
+    Body(100, 0, 0, Vec3(1, 1, 1)),
+    Body(100, 0, 0, Vec3(1, 1, 1)),
+    Body(100, 0, 0, Vec3(1, 1, 1)),
+    Body(100, 0, 0, Vec3(1, 1, 1)),
+};
+
+void update(int _) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            if (i != j) {
+                float acc_factor = bodies[i].mass * bodies[j].mass / pow((bodies[i].position - bodies[j].position).length(), 2);
+                Vec3 acc = (bodies[j].position - bodies[i].position).unitary() * acc_factor;
+                bodies[i].velocity = bodies[i].velocity + acc * (1000.0 / DELTA);
+            }
+        }
+        
+        bodies[i].position = bodies[i].position + bodies[i].velocity * DELTA * 0.001;
+    }
 }
 
 void draw(void) {
@@ -18,7 +50,7 @@ void draw(void) {
         glTranslated(0, 0, 0);
         glutWireSphere(30.0, 20, 20);
     glPopMatrix();
-    
+
     glColor3f(1.0, 0.1, 0.1);
     glPushMatrix();
         glTranslated(50, 0, 0);

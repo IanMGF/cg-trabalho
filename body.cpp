@@ -4,7 +4,7 @@
 #include <cmath>
 
 class Body {
-    private:
+    public:
         float radius;
         float distance;
         float mass;
@@ -12,7 +12,6 @@ class Body {
         Vec3 velocity;
         Vec3 color;
 
-    public:
         Body(float radius, float distance, float mass, Vec3 color) {
             this->radius = radius;
             this->distance = distance;
