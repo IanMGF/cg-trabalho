@@ -1,15 +1,16 @@
 #include <GL/freeglut_std.h>
 #include <GL/glut.h>
 #include <vector>
+#include "vec3.cpp"
 
-class Planet {
+class Body {
     private:
         float radius;
         float distance;
         float mass;
         
     public:
-        Planet(float radius, float distance, float mass) {
+        Body(float radius, float distance, float mass) {
             this->radius = radius;
             this->distance = distance;
             this->mass = mass;

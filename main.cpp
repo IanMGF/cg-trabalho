@@ -1,4 +1,5 @@
 #include <GL/freeglut_std.h>
+#include <GL/gl.h>
 #include <GL/glut.h>
 #include <iostream>
 GLfloat angle, fAspect, largura, altura, xcamera, ycamera, zcamera;
@@ -17,59 +18,12 @@ void draw(void) {
         glTranslated(0, 0, 0);
         glutWireSphere(30.0, 20, 20);
     glPopMatrix();
-/*
-	// Desenha um cubo utilizando primitivas
-	// OBSERVE que cada fece é desenhada com os vértices no sentido anti-horário
-	glColor3f(0.7f, 0.4f, 1.0f);
-	glBegin(GL_QUADS);			// Face frontal
-		glNormal3f(0.0, 0.0, 1.0); 	// Normal da face
-		glVertex3f(40.0, 40.0, 80.0);
-		glVertex3f(-40.0, 40.0, 80.0);
-		glVertex3f(-40.0, -40.0, 80.0);
-		glVertex3f(40.0, -40.0, 80.0);
-	glEnd();
-		glColor3f(0.0f, 0.0f, 1.0f);
-	glBegin(GL_QUADS);			// Face posterior
-		glNormal3f(0.0, 0.0, -1.0);	// Normal da face
-		glVertex3f(40.0, 40.0, 0.0);
-		glVertex3f(40.0, -40.0, 0.0);
-		glVertex3f(-40.0, -40.0, 0.0);
-		glVertex3f(-40.0, 40.0, 0.0);
-	glEnd();
-	glColor3f(1.0f, 1.0f, 0.0f);
-	glBegin(GL_QUADS);			// Face inferior
-		glNormal3f(0.0, -1.0, 0.0); 	// Normal da face
-		glVertex3f(-40.0, -40.0, 0.0);
-		glVertex3f(40.0, -40.0, 0.0);
-		glVertex3f(40.0, -40.0, 80.0);
-		glVertex3f(-40.0, -40.0, 80.0);
-	glEnd();
-glColor3f(0.0f, 1.0f, 0.0f);
-	glBegin(GL_QUADS);			// Face lateral esquerda
-		glNormal3f(-1.0, 0.0, 0.0); 	// Normal da face
-		glVertex3f(-40.0, 40.0, 80.0);
-		glVertex3f(-40.0, 40.0, 0.0);
-		glVertex3f(-40.0, -40.0, 0.0);
-		glVertex3f(-40.0, -40.0, 80.0);
-	glEnd();
-
-	glColor3f(0.0f, 1.0f, 0.0f);
-	glBegin(GL_QUADS);			// Face lateral direita
-		glNormal3f(1.0, 0.0, 0.0);	// Normal da face
-		glVertex3f(40.0, 40.0, 80.0);
-		glVertex3f(40.0, -40.0, 80.0);
-		glVertex3f(40.0, -40.0, 0.0);
-		glVertex3f(40.0, 40.0, 0.0);
-	glEnd();
-	glColor3f(0.0f, 1.0f, 1.0f);
-	glBegin(GL_QUADS);			// Face superior
-		glNormal3f(0.0, 1.0, 0.0);  	// Normal da face
-		glVertex3f(-40.0, 40.0, 0.0);
-		glVertex3f(-40.0, 40.0, 80.0);
-		glVertex3f(40.0, 40.0, 80.0);
-		glVertex3f(40.0, 40.0, 0.0);
-	glEnd();
-*/
+    
+    glColor3f(1.0, 0.1, 0.1);
+    glPushMatrix();
+        glTranslated(50, 0, 0);
+        glutWireSphere(20.0, 20, 20);
+    glPopMatrix();
 	glutSwapBuffers();
 }
 
@@ -91,7 +45,7 @@ void EspecificaParametrosVisualizacao(void)
 	// Inicializa sistema de coordenadas de projeção
 	glLoadIdentity();
 	// Especifica a projeção perspectiva
-	gluPerspective(angle, fAspect, 0.1, 1000);
+	gluPerspective(angle, fAspect, 0.01, 1000);
 
 	// Especifica sistema de coordenadas do modelo
 	glMatrixMode(GL_MODELVIEW);
@@ -143,10 +97,10 @@ void TeclasEspeciais(int key, int x, int y)
 // Função callback chamada para gerenciar teclado
 void GerenciaTeclado(unsigned char key, int x, int y) {
 	switch (key) {
-		case ' ': // restaura posição inicial da camera
+		case ' ':
 			ycamera = 50;
             xcamera = 50;
-            zcamera = 300;
+            zcamera = 100;
 			break;
 /*
 			// movimentacao da camera em z
@@ -161,9 +115,9 @@ void GerenciaTeclado(unsigned char key, int x, int y) {
 	glutPostRedisplay();
 }
 
-/*
+
 // Função callback chamada para gerenciar eventos do mouse
-void GerenciaMouse(int button, int state, int x, int y)
+void mouse_callback(int button, int state, int x, int y)
 {
 	if (button == GLUT_LEFT_BUTTON){
 
@@ -171,11 +125,11 @@ void GerenciaMouse(int button, int state, int x, int y)
 	if (button == GLUT_RIGHT_BUTTON){
 
 	}
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     EspecificaParametrosVisualizacao();
 	glutPostRedisplay();
 }
-*/
+
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
