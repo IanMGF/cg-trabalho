@@ -6,8 +6,9 @@
 #include "body.cpp"
 
 #define G 6.67430e-11
-#define DELTA 10
-#define FACTOR 100000
+#define DELTA 1
+#define STEPS 1000
+#define FACTOR 200
 
 GLfloat angle, fAspect, largura, altura, xcamera, ycamera, zcamera;
 
@@ -18,14 +19,14 @@ Body bodies[10] = {
     // Planets
 
     // Ash Twin
-    Body(169, 5250, 1.6E+6, Vec3(0.85, 0.31, 0.11)),
+    Body(169, Vec3(-250, 0, 5000), 1.6E+6, Vec3(0.85, 0.31, 0.11), Vec3(0.07307147186145904, 0, 0 )),//-0.00000326785556596371)),
     // Ember Twin
-    Body(170, 4750, 1.6E+6, Vec3(0.89, 0.62, 0.29)),
+    Body(170, Vec3(250, 0, 5000), 1.6E+6, Vec3(0.89, 0.62, 0.29), Vec3(0.07307147186145904, 0, 0)),//0.00000326785556596371)),
 
     // Timber Heart
     Body(254, 8600, 3E+6, Vec3(0.22, 0.38, 0.27)),
     // Attlerock
-    Body(80, 9500, 5E+7, Vec3(0.62, 0.49, 0.42)),
+    Body(80, 9500, 1E+6, Vec3(0.62, 0.49, 0.42), Vec3(0.0004716743226704912 + 0.053011617396070534, 0, 0)),
 
     // Brittle Hollow
     Body(272, 11700, 3E+6, Vec3(0.31, 0.26, 0.34)),
@@ -42,23 +43,22 @@ Body bodies[10] = {
     Body(83, 19000, 5.5E+6, Vec3(0.13, 0.48, 0.62)),
 
     // Quantum Moon
-    //Body(100, 0, 0, Vec3(1, 1, 1)),
+    // Body(100, 0, 0, Vec3(1, 1, 1)),
 };
 
 void update(int _) {
-    for (int i = 0; i < 10; i++) {
-        for (int j = 0; j < 10; j++) {
-            if (i != j) {
-                float acc_factor = G * bodies[j].mass / pow((bodies[i].position - bodies[j].position).length(), 2);
-                Vec3 acc = (bodies[j].position - bodies[i].position).unitary() * acc_factor;
-                bodies[i].velocity = bodies[i].velocity + acc * DELTA * FACTOR * 0.001;
+    for (int _step = 0; _step < STEPS; _step++){
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (i != j) {
+                    float acc_factor = G * bodies[j].mass / pow((bodies[i].position - bodies[j].position).length(), 2);
+                    Vec3 acc = (bodies[j].position - bodies[i].position).unitary() * acc_factor;
+                    bodies[i].velocity = bodies[i].velocity + acc * DELTA * FACTOR * 0.001;
+                }
             }
+
+            bodies[i].position = bodies[i].position + bodies[i].velocity * DELTA * FACTOR * 0.001;
         }
-    
-        bodies[i].position = bodies[i].position + bodies[i].velocity * DELTA * FACTOR * 0.001;
-        // std::cout << "BODY " << i << std::endl;
-        // std::cout << "POSITION: " << "(" << bodies[i].position.x << ", " << bodies[i].position.y << ", " << bodies[i].position.z << ")" << std::endl;
-        // std::cout << "VELOCITY: " << "(" << bodies[i].velocity.x << ", " << bodies[i].velocity.y << ", " << bodies[i].velocity.z << ")" << std::endl;
     }
     
     glutPostRedisplay();

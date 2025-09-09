@@ -7,15 +7,22 @@
 class Body {
     public:
         float radius;
-        float distance;
         float mass;
         Vec3 position;
         Vec3 velocity;
         Vec3 color;
 
+        Body(float radius, Vec3 initial_position, float mass, Vec3 color, Vec3 initial_velocity) {
+            this->radius = radius;
+            this->mass = mass;
+            this->color = color;
+
+            this->position = initial_position;
+            this->velocity = initial_velocity;
+        }
+        
         Body(float radius, float distance, float mass, Vec3 color, Vec3 initial_velocity) {
             this->radius = radius;
-            this->distance = distance;
             this->mass = mass;
             this->color = color;
 
@@ -25,7 +32,6 @@ class Body {
         
         Body(float radius, float distance, float mass, Vec3 color){
             this->radius = radius;
-            this->distance = distance;
             this->mass = mass;
             this->color = color;
 
@@ -37,7 +43,7 @@ class Body {
         void draw() {
             glColor3f(color.x, color.y, color.z);
             glPushMatrix();
-            glTranslatef(distance, 0, 0);
+            glTranslatef(position.x, position.y, position.z);
             glutSolidSphere(radius, 20, 20);
             glPopMatrix();
         }
