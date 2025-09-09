@@ -19,14 +19,14 @@ Body bodies[10] = {
     // Planets
 
     // Ash Twin
-    Body(169, Vec3(-250, 0, 5000), 1.6E+6, Vec3(0.85, 0.31, 0.11), Vec3(0.07307147186145904, 0, 0 )),//-0.00000326785556596371)),
+    Body(169, Vec3(-250, 0, 5000), 1.6E+6, Vec3(0.85, 0.31, 0.11), Vec3(0.07307147186145904, 0, 0 )),
     // Ember Twin
-    Body(170, Vec3(250, 0, 5000), 1.6E+6, Vec3(0.89, 0.62, 0.29), Vec3(0.07307147186145904, 0, 0)),//0.00000326785556596371)),
+    Body(170, Vec3(250, 0, 5000), 1.6E+6, Vec3(0.89, 0.62, 0.29), Vec3(0.07307147186145904, 0, 0)),
 
     // Timber Heart
     Body(254, 8600, 3E+6, Vec3(0.22, 0.38, 0.27)),
     // Attlerock
-    Body(80, 9500, 1E+6, Vec3(0.62, 0.49, 0.42), Vec3(0.0004716743226704912 + 0.053011617396070534, 0, 0)),
+    Body(80, 9500, 5E+7, Vec3(0.62, 0.49, 0.42)),
 
     // Brittle Hollow
     Body(272, 11700, 3E+6, Vec3(0.31, 0.26, 0.34)),
@@ -107,7 +107,7 @@ void view_setup(void)
 	glLoadIdentity();
 
 	// Especifica posição do observador e do alvo
-	gluLookAt(0, 20000, 0,  // posição da câmera
+	gluLookAt(0, 25000, 0,  // posição da câmera
               0, 0, 0,          // posição do alvo
               0, 0, 1);         // vetor UP da câmera
 }
