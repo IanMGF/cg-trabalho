@@ -29,4 +29,8 @@ class Vec3 {
             float length = this->length();
             return Vec3(x / length, y / length, z / length);
         }
+        
+        Vec3 cross(const Vec3& other) const {
+            return Vec3(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x);
+        }
 };

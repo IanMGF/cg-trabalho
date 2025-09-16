@@ -11,6 +11,7 @@
 #define C_LENGHT 7
 #define G 6.67430e-11
 #define DELTA 2
+
 int steps = 250;
 int factor = 800;
 
@@ -26,16 +27,15 @@ typedef struct Camera {
     Vec3 position;
     Vec3 target;
     Vec3 up;
-    float angle;
-    float distance_to_target;
 } Camera;
 
+#define INITIAL_CAMERA_POSITION Vec3(25000, 5000, 0)
+#define INITIAL_CAMERA_UP Vec3(0, 1, 0)
+
 Camera cam = {
-    Vec3(0, 25000, 0),
+    INITIAL_CAMERA_POSITION,
     Vec3(0, 0, 0),
-    Vec3(0, 0, 1),
-    0.0,
-    25000
+    INITIAL_CAMERA_UP,
 };
 
 float sun_step_change_timer = 0;
@@ -263,27 +263,25 @@ void setup(void)
 // Função usada para especificar o volume de visualização
 void view_setup(void)
 {
-	// Especifica sistema de coordenadas de projeção
 	glMatrixMode(GL_PROJECTION);
-	// Inicializa sistema de coordenadas de projeção
 	glLoadIdentity();
-	// Especifica a projeção perspectiva
 	gluPerspective(90, fAspect, 1, 1E+9);
 
-	// Especifica sistema de coordenadas do modelo
 	glMatrixMode(GL_MODELVIEW);
-	// Inicializa sistema de coordenadas do modelo
 	glLoadIdentity();
 
-	const float sun_position[4] = {0, 0, 0, 1};
 
-	// Especifica posição do observador e do alvo
+	Vec3 cam_position = Vec3(0, 0, 0);
+	Vec3 cam_target = Vec3(0, 0, 0);
+	Vec3 cam_up = Vec3(0, 0, 1);
+	
 	gluLookAt(
 		cam.position.x, cam.position.y, cam.position.z,
         cam.target.x, cam.target.y, cam.target.z,
         cam.up.x, cam.up.y, cam.up.z
 	);
 
+	const float sun_position[4] = {0, 0, 0, 1};
 	glLightfv(GL_LIGHT0, GL_POSITION, sun_position);
 }
 
@@ -321,35 +319,38 @@ void special_keys_callback(int key, int x, int y)
 }
 // Função callback chamada para gerenciar teclado
 void keyboard_callback(unsigned char key_code, int x, int y) {
+    float distance = cam.position.length();
 	switch (key_code) {
 		case 'r':
-			cam.position.x = 0;
-            cam.position.y = 25000;
-            cam.position.z = 0;
-            cam.angle = 0.0;
+			cam.position = INITIAL_CAMERA_POSITION;
+			cam.up = INITIAL_CAMERA_UP;
 			break;
 
 		// Movimentação da câmera
 		case 'w':
-		    cam.position.x += 1000;
+		    cam.position = cam.position + cam.up * 300;
+            cam.position = cam.position.unitary() * distance;
 			break;
 		case 'a':
-		    cam.position.z += 1000;
+		    cam.position = cam.position + cam.up.cross(cam.target - cam.position).unitary() * 300;
+			cam.position = cam.position.unitary() * distance;
 			break;
 		case 's':
-            cam.position.x -= 1000;
+            cam.position = cam.position - cam.up * 300;
+            cam.position = cam.position.unitary() * distance;
             break;
 		case 'd':
-		    cam.position.z -= 1000;
+		    cam.position = cam.position - cam.up.cross(cam.target - cam.position).unitary() * 300;
+            cam.position = cam.position.unitary() * distance;
 			break;
 
 		case 'q':
-		    cam.angle += 0.03;
-			cam.up = Vec3(sin(cam.angle), 0, cos(cam.angle));
+		    distance = distance / 1.01;
+            cam.position = cam.position.unitary() * distance;
 			break;
 		case 'e':
-		    cam.angle -= 0.03;
-			cam.up = Vec3(sin(cam.angle), 0, cos(cam.angle));
+		    distance = distance * 1.01;
+            cam.position = cam.position.unitary() * distance;
 			break;
 
 		case 'x':
