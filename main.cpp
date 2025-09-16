@@ -35,45 +35,26 @@ Vec3 sun_color = Vec3(1, 1, 0.4);
 
 GLfloat fAspect;
 
-Body bodies[10] = {
-    // Sun
-    Body(2000, 0, sun_mass, sun_color),
+std::vector<Body> bodies = std::vector<Body>();
 
-    // Planets
-
-    // Ash Twin
-    Body(169, Vec3(-250, 0, 5000), 1.6E+6, Vec3(0.85, 0.31, 0.11), Vec3(0.07307147186145904, 0, 0 )),
-    // Ember Twin
-    Body(170, Vec3(250, 0, 5000), 1.6E+6, Vec3(0.89, 0.62, 0.29), Vec3(0.07307147186145904, 0, 0)),
-
-    // Timber Heart
-    Body(254, 8600, 3E+7, Vec3(0.22, 0.38, 0.27)),
-    // Attlerock
-    Body(80, Vec3(900, 0, 8600), 5E+5, Vec3(0.62, 0.49, 0.42), Vec3(0.0557164, 0, 0.001491565173)),
-
-    // Brittle Hollow
-    Body(272, 11700, 3E+7, Vec3(0.31, 0.26, 0.34)),
-    // Hollow's Lantern
-    Body(97, Vec3(1000, 0, 11700), 9.1E+5, Vec3(1, 0.75, 0.13), Vec3(0.04776831, 0, 0.001415022)),
-
-    // Giant's Deep
-    Body(500, 16460, 2.2E+7, Vec3(0.11, 0.42, 0.27)),
-
-    // Dark Bramble
-    Body(203.3, 20000, 3.25E+6, Vec3(0.3, 0.13, 0.12)),
-
-    // Interloper
-    Body(83, 19000, 5.5E+6, Vec3(0.13, 0.48, 0.62)),
-
-    // Quantum Moon
-    // Body(100, 0, 0, Vec3(1, 1, 1)),
+void physics_setup() {
+    bodies.push_back(Body(2000, 0, sun_mass, sun_color));
+    bodies.push_back(Body(169, Vec3(-250, 0, 5000), 1.6E+6, Vec3(0.85, 0.31, 0.11), Vec3(0.07307147186145904, 0, 0)));
+    bodies.push_back(Body(170, Vec3(250, 0, 5000), 1.6E+6, Vec3(0.89, 0.62, 0.29), Vec3(0.07307147186145904, 0, 0)));
+    bodies.push_back(Body(254, 8600, 3E+7, Vec3(0.22, 0.38, 0.27)));
+    bodies.push_back(Body(80, Vec3(900, 0, 8600), 5E+5, Vec3(0.62, 0.49, 0.42), Vec3(0.0557164, 0, 0.001491565173)));
+    bodies.push_back(Body(272, 11700, 3E+7, Vec3(0.31, 0.26, 0.34)));
+    bodies.push_back(Body(97, Vec3(1000, 0, 11700), 9.1E+5, Vec3(1, 0.75, 0.13), Vec3(0.04776831, 0, 0.001415022)));
+    bodies.push_back(Body(500, 16460, 2.2E+7, Vec3(0.11, 0.42, 0.27)));
+    bodies.push_back(Body(203.3, 20000, 3.25E+6, Vec3(0.3, 0.13, 0.12)));
+    bodies.push_back(Body(83, 19000, 5.5E+6, Vec3(0.13, 0.48, 0.62)));
 };
 
 void update(int _) {
     float effective_delta = DELTA * factor * 0.001;
     for (int _step = 0; _step < steps; _step++){
-        for (int i = 0; i < 10; i++) {
-            for (int j = i + 1; j < 10; j++) {
+        for (int i = 0; i < bodies.size(); i++) {
+            for (int j = i + 1; j < bodies.size(); j++) {
                 float acc_factor = G / pow((bodies[i].position - bodies[j].position).length(), 2);
                 Vec3 acc = (bodies[j].position - bodies[i].position).unitary() * acc_factor;
 
@@ -129,7 +110,7 @@ void draw(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Desenha objetos 3D (wire-frame)
-	for (int i=0; i<10; i++) {
+	for (int i=0; i<bodies.size(); i++) {
 	    Body body = bodies[i];
 		
 	    glColor3f(body.color.x, body.color.y, body.color.z);
@@ -186,9 +167,11 @@ void view_setup(void)
 	glLoadIdentity();
 
 	// Especifica posição do observador e do alvo
-	gluLookAt(cam.position.x, cam.position.y, cam.position.z,  // posição da câmera
-              cam.target.x, cam.target.y, cam.target.z,          // posição do alvo
-              cam.up.x, cam.up.y, cam.up.z);         // vetor UP da câmera
+	gluLookAt(
+		cam.position.x, cam.position.y, cam.position.z,
+        cam.target.x, cam.target.y, cam.target.z,
+        cam.up.x, cam.up.y, cam.up.z
+	);
 }
 
 // Função callback chamada quando o tamanho da janela é alterado
@@ -300,6 +283,7 @@ int main(int argc, char** argv)
     glutSpecialFunc(special_keys_callback); // Define qual funcao gerencia as teclas especiais
 
     // Start
+    physics_setup();
     setup();
 	glutMainLoop();
 
