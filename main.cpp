@@ -4,16 +4,16 @@
 #include <GL/glut.h>
 #include <cmath>
 #include <vector>
-#include "body.cpp"
 #include <cstdlib>
 #include <ctime>
+#include "body.cpp"
 
 #define C_LENGHT 7
 #define G 6.67430e-11
 #define DELTA 2
 
-int steps = 250;
-int factor = 800;
+int steps = 100;
+int factor = 1000;
 
 struct dark_bramble_cylinder{
     GLdouble x;
@@ -51,6 +51,13 @@ GLfloat fAspect;
 std::vector<Body> bodies = std::vector<Body>();
 
 void physics_setup() {
+    Body comet = Body(500, Vec3(0, 0, 100000), 5.5E+6, Vec3(0.13, 0.48, 0.62), Vec3(0, 0, 0));
+    float semi_major_axis = 60000.0;
+    float inv_a = 1 / semi_major_axis;
+    float initial_speed = std::sqrt(G * (comet.mass + sun_mass) * (2 / 100000.0 - inv_a));
+    
+    comet.velocity = Vec3(initial_speed, 0, 0);
+    
     bodies.push_back(Body(2000, 0, sun_mass, sun_color));
     bodies.push_back(Body(169, Vec3(-250, 0, 5000), 1.6E+6, Vec3(0.85, 0.31, 0.11), Vec3(0.07307147186145904, 0, 0)));
     bodies.push_back(Body(170, Vec3(250, 0, 5000), 1.6E+6, Vec3(0.89, 0.62, 0.29), Vec3(0.07307147186145904, 0, 0)));
@@ -60,7 +67,7 @@ void physics_setup() {
     bodies.push_back(Body(97, Vec3(1000, 0, 11700), 9.1E+5, Vec3(1, 0.75, 0.13), Vec3(0.04776831, 0, 0.001415022)));
     bodies.push_back(Body(500, 16460, 2.2E+7, Vec3(0.11, 0.42, 0.27)));
     bodies.push_back(Body(800, 20000, 3.25E+6, Vec3(0.3, 0.13, 0.12)));
-    bodies.push_back(Body(83, 19000, 5.5E+6, Vec3(0.13, 0.48, 0.62)));
+    bodies.push_back(comet);
 };
 
 void update(int _) {
@@ -270,11 +277,6 @@ void view_setup(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-
-	Vec3 cam_position = Vec3(0, 0, 0);
-	Vec3 cam_target = Vec3(0, 0, 0);
-	Vec3 cam_up = Vec3(0, 0, 1);
-	
 	gluLookAt(
 		cam.position.x, cam.position.y, cam.position.z,
         cam.target.x, cam.target.y, cam.target.z,
@@ -299,23 +301,8 @@ void window_change_callback(GLint new_width, GLint new_height)
 // Função callback chamada para gerenciar teclas especiais
 void special_keys_callback(int key, int x, int y)
 {
-	if (key == GLUT_KEY_UP) {
-		// ycamera += 10;
-	}
-	if (key == GLUT_KEY_DOWN) {
-		// ycamera -= 10;
-	}
-	/*
-	if (key == GLUT_KEY_RIGHT) {
-
-	}
-	if (key == GLUT_KEY_LEFT) {
-
-	}
-	*/
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer
     view_setup();
-	// glutPostRedisplay();
 }
 // Função callback chamada para gerenciar teclado
 void keyboard_callback(unsigned char key_code, int x, int y) {
@@ -328,19 +315,19 @@ void keyboard_callback(unsigned char key_code, int x, int y) {
 
 		// Movimentação da câmera
 		case 'w':
-		    cam.position = cam.position + cam.up * 300;
+		    cam.position = cam.position + cam.up * (distance / 100);
             cam.position = cam.position.unitary() * distance;
 			break;
 		case 'a':
-		    cam.position = cam.position + cam.up.cross(cam.target - cam.position).unitary() * 300;
+		    cam.position = cam.position + cam.up.cross(cam.target - cam.position).unitary() * (distance / 100);
 			cam.position = cam.position.unitary() * distance;
 			break;
 		case 's':
-            cam.position = cam.position - cam.up * 300;
+            cam.position = cam.position - cam.up * (distance / 100);
             cam.position = cam.position.unitary() * distance;
             break;
 		case 'd':
-		    cam.position = cam.position - cam.up.cross(cam.target - cam.position).unitary() * 300;
+		    cam.position = cam.position - cam.up.cross(cam.target - cam.position).unitary() * (distance / 100);
             cam.position = cam.position.unitary() * distance;
 			break;
 
@@ -354,7 +341,8 @@ void keyboard_callback(unsigned char key_code, int x, int y) {
 			break;
 
 		case 'x':
-            sun_explosion_step = 1;
+		    if(sun_explosion_step == 0)
+                sun_explosion_step = 1;
             break;
 	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer
@@ -367,10 +355,10 @@ void keyboard_callback(unsigned char key_code, int x, int y) {
 void mouse_callback(int button, int state, int x, int y)
 {
 	if (button == GLUT_LEFT_BUTTON){
-
+	    factor = (int) (factor * 1.1);
 	}
 	if (button == GLUT_RIGHT_BUTTON){
-
+	    factor = (int) (factor / 1.1);
 	}
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     view_setup();
@@ -385,6 +373,12 @@ int main(int argc, char** argv)
 
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);  //GLUT_DOUBLE trabalha com dois buffers: um para renderização e outro para exibição
 
+	#define INITIAL_WIDTH 1280
+	#define INITIAL_HEIGHT 720
+
+	const int initial_x = (glutGet(GLUT_SCREEN_WIDTH) - INITIAL_WIDTH) / 2;
+	const int initial_y = (glutGet(GLUT_SCREEN_HEIGHT) - INITIAL_HEIGHT) / 2;
+
     glutInitWindowPosition(700,100);
 	glutInitWindowSize(1280, 720);
 
@@ -393,10 +387,10 @@ int main(int argc, char** argv)
 
     glutTimerFunc(DELTA, update, 0);
 	glutDisplayFunc(draw);
-	glutReshapeFunc(window_change_callback); // Função para ajustar o tamanho da tela
-    //glutMouseFunc(GerenciaMouse);
-    glutKeyboardFunc(keyboard_callback); // Define qual funcao gerencia o comportamento do teclado
-    glutSpecialFunc(special_keys_callback); // Define qual funcao gerencia as teclas especiais
+	glutReshapeFunc(window_change_callback);
+    glutMouseFunc(mouse_callback);
+    glutKeyboardFunc(keyboard_callback);
+    glutSpecialFunc(special_keys_callback);
 
     // Start
     physics_setup();
