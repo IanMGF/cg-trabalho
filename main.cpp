@@ -5,11 +5,22 @@
 #include <cmath>
 #include <vector>
 #include "body.cpp"
+#include <cstdlib>
+#include <ctime>
 
+#define C_LENGHT 7
 #define G 6.67430e-11
 #define DELTA 2
 int steps = 250;
 int factor = 800;
+
+struct dark_bramble_cylinder{
+    GLdouble x;
+    GLdouble y;
+    GLdouble angle_rotation;
+    GLdouble height;
+    Vec3 scale_factor;
+};
 
 typedef struct Camera {
     Vec3 position;
@@ -33,6 +44,8 @@ float sun_scale = 1;
 float sun_mass = 4e11;
 Vec3 sun_color = Vec3(1, 1, 0.4);
 
+dark_bramble_cylinder cylinders[C_LENGHT];
+
 GLfloat fAspect;
 
 std::vector<Body> bodies = std::vector<Body>();
@@ -46,7 +59,7 @@ void physics_setup() {
     bodies.push_back(Body(272, 11700, 3E+7, Vec3(0.31, 0.26, 0.34)));
     bodies.push_back(Body(97, Vec3(1000, 0, 11700), 9.1E+5, Vec3(1, 0.75, 0.13), Vec3(0.04776831, 0, 0.001415022)));
     bodies.push_back(Body(500, 16460, 2.2E+7, Vec3(0.11, 0.42, 0.27)));
-    bodies.push_back(Body(203.3, 20000, 3.25E+6, Vec3(0.3, 0.13, 0.12)));
+    bodies.push_back(Body(200, 20000, 3.25E+6, Vec3(0.3, 0.13, 0.12)));
     bodies.push_back(Body(83, 19000, 5.5E+6, Vec3(0.13, 0.48, 0.62)));
 };
 
@@ -71,7 +84,6 @@ void update(int _) {
     if (sun_explosion_step != 0) {
         float effective_delta = DELTA * 0.001;
         sun_step_change_timer += effective_delta;
-        
         switch(sun_explosion_step) {
             case 1:
                 sun_scale += 1 * effective_delta / 2;
@@ -97,11 +109,9 @@ void update(int _) {
                 sun_scale += 2 * effective_delta;
                 break;
         }
-        
         bodies[0].mass = sun_mass;
         bodies[0].color = sun_color;
     }
-    
     glutPostRedisplay();
     glutTimerFunc(DELTA, update, 0);
 }
@@ -111,7 +121,6 @@ void draw(void) {
 
 	for (int i=0; i<bodies.size(); i++) {
 	    Body body = bodies[i];
-		
 	    glColor3f(body.color.x, body.color.y, body.color.z);
 		glPushMatrix();
 			glTranslated(body.position.x, body.position.y, body.position.z);
@@ -155,6 +164,61 @@ void draw(void) {
         gluCylinder(quad, 50000 / cylinder_path.length(), 50000 / cylinder_path.length(), cylinder_path.length(), 20, 20);
     glPopMatrix();
 
+    glPushMatrix();
+        glTranslated(bodies[8].position.x, bodies[8].position.y, bodies[8].position.z);
+        for(int i = 0; i < C_LENGHT; i++){
+           	glColor3f(0.3, 0.13, 0.12);
+
+            glRotated(cylinders[i].angle_rotation, cylinders[i].x, cylinders[i].y, 0);
+
+            gluCylinder(quad, 25, 25, 300, 20, 20);
+
+            glTranslated(0, 0, cylinders[i].height);
+            glScaled(cylinders[i].scale_factor.x, cylinders[i].scale_factor.y, cylinders[i].scale_factor.z);
+
+           	glColor3f(0.13, 0.48, 0.62);
+
+            glutSolidTetrahedron();
+
+            glScaled(1/cylinders[i].scale_factor.x, 1/cylinders[i].scale_factor.y, 1/cylinders[i].scale_factor.z);
+            glTranslated(0, 0, -cylinders[i].height);
+
+            glRotated(-cylinders[i].angle_rotation, cylinders[i].x, cylinders[i].y, 0);
+        }
+
+        glColor3f(0.64, 0.64, 0.64);
+
+        // esfera 1
+        glTranslated(125, 0, 0);
+        glutSolidSphere(100, 50, 50);
+        glTranslated(-125, 0, 0);
+
+        // esfera 2
+        glTranslated(-125, 0, 0);
+        glutSolidSphere(100, 50, 50);
+        glTranslated(125, 0, 0);
+
+        // esfera 3
+        glTranslated(0, 125, 0);
+        glutSolidSphere(100, 50, 50);
+        glTranslated(0, -125, 0);
+
+        // esfera 4
+        glTranslated(0, -125, 0);
+        glutSolidSphere(100, 50, 50);
+        glTranslated(0, 125, 0);
+
+        // esfera 5
+        glTranslated(0, 0, 125);
+        glutSolidSphere(100, 50, 50);
+        glTranslated(0, 0, -125);
+
+        // esfera 6
+        glTranslated(0, 0, -125);
+        glutSolidSphere(100, 50, 50);
+        glTranslated(0, 0, 125);
+    glPopMatrix();
+
 	glutSwapBuffers();
 }
 
@@ -178,6 +242,20 @@ void setup(void)
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_DEPTH_TEST);
+
+    for(int i=0; i < C_LENGHT; i++){
+        cylinders[i].scale_factor.x = ((((float)rand() / RAND_MAX) * 2) + 1) * 70;
+        cylinders[i].scale_factor.y = ((((float)rand() / RAND_MAX) * 2) + 1) * 70;
+        cylinders[i].scale_factor.z = ((((float)rand() / RAND_MAX) * 2) + 1) * 70;
+
+        cylinders[i].height = (((float)rand() / RAND_MAX * 0.6) + 1) * 250;
+
+        cylinders[i].angle_rotation = (float)rand() / (float)RAND_MAX * 180;
+
+        GLdouble angle_rad = ((float)rand() / (float)RAND_MAX - 0.5) * 2 * M_PI;
+        cylinders[i].x = std::sin(angle_rad);
+        cylinders[i].y = std::cos(angle_rad);
+    }
 }
 
 // Função usada para especificar o volume de visualização
@@ -298,6 +376,8 @@ void mouse_callback(int button, int state, int x, int y)
 
 int main(int argc, char** argv)
 {
+    srand(time(0));
+
     glutInit(&argc, argv);
 
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);  //GLUT_DOUBLE trabalha com dois buffers: um para renderização e outro para exibição
