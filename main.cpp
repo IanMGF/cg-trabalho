@@ -3,6 +3,7 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 #include <cmath>
+#include <vector>
 #include "body.cpp"
 #include <cstdlib>
 #include <ctime>
@@ -21,10 +22,21 @@ struct dark_bramble_cylinder{
     Vec3 scale_factor;
 };
 
-Vec3 camera_pos = Vec3(0, 25000 , 0);
-Vec3 camera_target = Vec3(0, 0, 0);
-Vec3 camera_up = Vec3(0, 0, 1);
-float camera_angle = 0.0;
+typedef struct Camera {
+    Vec3 position;
+    Vec3 target;
+    Vec3 up;
+    float angle;
+    float distance_to_target;
+} Camera;
+
+Camera cam = {
+    Vec3(0, 25000, 0),
+    Vec3(0, 0, 0),
+    Vec3(0, 0, 1),
+    0.0,
+    25000
+};
 
 float sun_step_change_timer = 0;
 int sun_explosion_step = 0;
@@ -250,9 +262,9 @@ void view_setup(void)
 	glLoadIdentity();
 
 	// Especifica posição do observador e do alvo
-	gluLookAt(camera_pos.x, camera_pos.y, camera_pos.z,  // posição da câmera
-              camera_target.x, camera_target.y, camera_target.z,          // posição do alvo
-              camera_up.x, camera_up.y, camera_up.z);         // vetor UP da câmera
+	gluLookAt(cam.position.x, cam.position.y, cam.position.z,  // posição da câmera
+              cam.target.x, cam.target.y, cam.target.z,          // posição do alvo
+              cam.up.x, cam.up.y, cam.up.z);         // vetor UP da câmera
 }
 
 // Função callback chamada quando o tamanho da janela é alterado
@@ -291,33 +303,33 @@ void special_keys_callback(int key, int x, int y)
 void keyboard_callback(unsigned char key_code, int x, int y) {
 	switch (key_code) {
 		case 'r':
-			camera_pos.x = 0;
-            camera_pos.y = 25000;
-            camera_pos.z = 0;
-            camera_angle = 0.0;
+			cam.position.x = 0;
+            cam.position.y = 25000;
+            cam.position.z = 0;
+            cam.angle = 0.0;
 			break;
 
 		// Movimentação da câmera
 		case 'w':
-		    camera_pos.x += 1000;
+		    cam.position.x += 1000;
 			break;
 		case 'a':
-		    camera_pos.z += 1000;
+		    cam.position.z += 1000;
 			break;
 		case 's':
-            camera_pos.x -= 1000;
+            cam.position.x -= 1000;
             break;
 		case 'd':
-		    camera_pos.z -= 1000;
+		    cam.position.z -= 1000;
 			break;
 
 		case 'q':
-		    camera_angle += 0.03;
-			camera_up = Vec3(sin(camera_angle), 0, cos(camera_angle));
+		    cam.angle += 0.03;
+			cam.up = Vec3(sin(cam.angle), 0, cos(cam.angle));
 			break;
 		case 'e':
-		    camera_angle -= 0.03;
-			camera_up = Vec3(sin(camera_angle), 0, cos(camera_angle));
+		    cam.angle -= 0.03;
+			cam.up = Vec3(sin(cam.angle), 0, cos(cam.angle));
 			break;
 
 		case 'x':
