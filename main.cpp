@@ -59,7 +59,7 @@ void physics_setup() {
     bodies.push_back(Body(272, 11700, 3E+7, Vec3(0.31, 0.26, 0.34)));
     bodies.push_back(Body(97, Vec3(1000, 0, 11700), 9.1E+5, Vec3(1, 0.75, 0.13), Vec3(0.04776831, 0, 0.001415022)));
     bodies.push_back(Body(500, 16460, 2.2E+7, Vec3(0.11, 0.42, 0.27)));
-    bodies.push_back(Body(200, 20000, 3.25E+6, Vec3(0.3, 0.13, 0.12)));
+    bodies.push_back(Body(800, 20000, 3.25E+6, Vec3(0.3, 0.13, 0.12)));
     bodies.push_back(Body(83, 19000, 5.5E+6, Vec3(0.13, 0.48, 0.62)));
 };
 
@@ -166,6 +166,7 @@ void draw(void) {
 
     glPushMatrix();
         glTranslated(bodies[8].position.x, bodies[8].position.y, bodies[8].position.z);
+        glScalef(4.0, 4.0, 4.0);
         for(int i = 0; i < C_LENGHT; i++){
            	glColor3f(0.3, 0.13, 0.12);
 
@@ -216,6 +217,7 @@ void draw(void) {
         // esfera 6
         glTranslated(0, 0, -125);
         glutSolidSphere(100, 50, 50);
+        glScalef(1/4.0, 1/4.0, 1/4.0);
         glTranslated(0, 0, 125);
     glPopMatrix();
 
