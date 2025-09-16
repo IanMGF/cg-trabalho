@@ -226,7 +226,7 @@ void draw(void) {
 
 void setup(void)
 {
-    const float ZEROES[4] = {0.0, 0.0, 0.0, 0.0};
+    const float ZEROES[4] = {0.0, 0.0, 0.0, 1.0};
     const float ONES[4] = {1.0, 1.0, 1.0, 1.0};
 
     glShadeModel(GL_SMOOTH);
