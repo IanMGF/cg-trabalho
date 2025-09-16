@@ -109,20 +109,35 @@ void update(int _) {
 void draw(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//Desenha objetos 3D (wire-frame)
 	for (int i=0; i<bodies.size(); i++) {
 	    Body body = bodies[i];
 		
 	    glColor3f(body.color.x, body.color.y, body.color.z);
 		glPushMatrix();
 			glTranslated(body.position.x, body.position.y, body.position.z);
-			
-			if (i == 0 && sun_explosion_step != 0) {
-			    // Sun scaling
+
+		    const float ONES[] = {1.0f, 1.0f, 1.0f, 1.0f};
+			const float ZERO[] = {0.0f, 0.0f, 0.0f, 1.0f};
+			const float SUN_COLOR[] = { sun_color.x, sun_color.y, sun_color.z, 1.0f };
+		
+			if (i == 0) {
+				glDisable(GL_LIGHT0);
+				glEnable(GL_LIGHT1);
+				glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, SUN_COLOR);
+				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, ZERO);
 			    glScalef(sun_scale, sun_scale, sun_scale);
 			}
-			
-			glutSolidSphere(body.radius, 50, 50);
+
+			glutSolidSphere(body.radius, 100, 100);
+
+			if (i == 0) {
+				glDisable(GL_LIGHT1);
+				float sun_diffuse[] = {sun_color.x, sun_color.y, sun_color.z, 1.0f};
+				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, sun_diffuse);
+				glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, ZERO);
+				glLightfv(GL_LIGHT0, GL_DIFFUSE, sun_diffuse);
+				glEnable(GL_LIGHT0);
+			}
 		glPopMatrix();
 	}
 
@@ -145,9 +160,23 @@ void draw(void) {
 
 void setup(void)
 {
-    // Slightly blue tone
-	glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
+    const float ZEROES[4] = {0.0, 0.0, 0.0, 0.0};
+    const float ONES[4] = {1.0, 1.0, 1.0, 1.0};
 
+    glShadeModel(GL_SMOOTH);
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, ONES);
+    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 100);
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ZEROES);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, ZEROES);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, ZEROES);
+
+    glLightfv(GL_LIGHT1, GL_EMISSION, ONES);
+
+    glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -166,12 +195,16 @@ void view_setup(void)
 	// Inicializa sistema de coordenadas do modelo
 	glLoadIdentity();
 
+	const float sun_position[4] = {0, 0, 0, 1};
+
 	// Especifica posição do observador e do alvo
 	gluLookAt(
 		cam.position.x, cam.position.y, cam.position.z,
         cam.target.x, cam.target.y, cam.target.z,
         cam.up.x, cam.up.y, cam.up.z
 	);
+
+	glLightfv(GL_LIGHT0, GL_POSITION, sun_position);
 }
 
 // Função callback chamada quando o tamanho da janela é alterado
