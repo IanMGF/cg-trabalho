@@ -6,6 +6,7 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <random>
 #include "body.cpp"
 
 
@@ -68,24 +69,61 @@ GLfloat fAspect;
 
 std::vector<Body> bodies = std::vector<Body>();
 
+SupernovaParticle generate_particle(void) {
+    SupernovaParticle particle;
+    particle.age = 0.0f;
+    particle.lifetime = 2.0f + ((float)rand()) / (RAND_MAX / 3.0f); // 2 a 5 segs
+    particle.t = 0.0f;
+    particle.speed = 0.1f + ((float)rand()) / (RAND_MAX / 1.5f);
+
+    // Posição inicial no Sol
+    Vec3 center = bodies[0].position;
+
+    float distance_from_sun = bodies[0].radius * ((float) rand() / RAND_MAX) * 0.4;
+    float wave_amplitude = bodies[0].radius * (1 + ((float) rand() / RAND_MAX));
+
+    float escape_elevation = 2 * M_PI * ((float) rand() / RAND_MAX);
+    float escape_azimuth = 2 * M_PI * ((float) rand() / RAND_MAX);
+    
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::normal_distribution<double> standard_normal_dist(0.0, 1.0);
+    
+    Vec3 midpoint = Vec3(
+        standard_normal_dist(generator),
+        standard_normal_dist(generator),
+        standard_normal_dist(generator)
+    ).unitary() * distance_from_sun / 2;
+    Vec3 surface_point = midpoint.unitary() * bodies[0].radius;
+    Vec3 far_point = midpoint * 2;
+    
+    // Generate a pull point perpendicular to the midpoint
+    Vec3 aux_vec = midpoint + Vec3(
+        -midpoint.x,
+        midpoint.y,
+        0
+    );
+    Vec3 perpendicular = aux_vec.cross(midpoint).unitary();
+    Vec3 pull_point = perpendicular * wave_amplitude * 2;
+
+    // Define pontos de controle para curvas Bézier saindo do Sol
+    Vec3 p1_delta = midpoint + pull_point;
+    Vec3 p2_delta = midpoint - pull_point;
+    Vec3 p3_delta = midpoint * 2;
+
+    particle.p0 = center + surface_point;
+    particle.p1 = center + surface_point+ p1_delta;
+    particle.p2 = center + surface_point+ p2_delta;
+    particle.p3 = center + surface_point+ p3_delta;
+
+    // Cor inicial
+    particle.color = Vec3(1, 1, 1);
+    return particle;
+}
+
 void reset_supernova() {
     for (int i = 0; i < NUM_PARTICLES; i++) {
-        particles[i].age = 0.0f;
-        particles[i].lifetime = 2.0f + ((float)rand()) / (RAND_MAX / 3.0f); // 2 a 5 segs
-        particles[i].t = 0.0f;
-        particles[i].speed = 0.5f + ((float)rand()) / (RAND_MAX / 1.5f);
-
-        // Posição inicial no Sol
-        Vec3 center = bodies[0].position;
-
-        // Define pontos de controle para curvas Bézier saindo do Sol
-        particles[i].p0 = center;
-        particles[i].p1 = center + Vec3(rand()%750 - 250, rand()%750 - 250, rand()%750 - 250);
-        particles[i].p2 = center + Vec3(rand()%1500 - 500, rand()%1500 - 500, rand()%1500 - 500);
-        particles[i].p3 = center + Vec3(rand()%3000 - 1000, rand()%3000 - 1000, rand()%3000 - 1000);
-
-        // Cor inicial
-        particles[i].color = Vec3(1, 1, 1);
+        particles[i] = generate_particle();
     }
 }
 
@@ -132,9 +170,15 @@ void update_particles(float delta_time) {
 
             p.position = pos * sun_scale + bodies[0].position; // escala e centraliza no Sol
 
-            // Armazena posição para a linha (flare)
-            p.trail.push_back(p.position);
-            if (p.trail.size() > 20) p.trail.erase(p.trail.begin()); // limite de pontos
+            if(p.trail.empty()) {
+                p.trail.push_back(p.position);
+                continue;
+            } else if ((*p.trail.end() - p.position).length() > 100) {
+                p.trail.push_back(p.position);
+                if (p.trail.size() > 20) p.trail.erase(p.trail.begin()); // limite de pontos
+            }
+        } else {
+            particles[i] = generate_particle();
         }
     }
 }
@@ -305,8 +349,16 @@ void draw(void) {
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glLineWidth(2.0f);
+        if (sun_explosion_step < 3)
+            glLineWidth(2.0f);
+        else
+            glLineWidth(2.0 * sun_scale);
         glDepthMask(GL_FALSE);
+
+        glDisable(GL_LIGHT0);
+        glEnable(GL_LIGHT1);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, SUN_COLOR);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, ZERO);
 
         for (int i = 0; i < NUM_PARTICLES; i++) {
             if (particles[i].lifetime > 0 && !particles[i].trail.empty()) {
@@ -315,23 +367,18 @@ void draw(void) {
                     float alpha = (float)j / particles[i].trail.size(); // fade da ponta
                     glColor4f(sun_color.x, sun_color.y, sun_color.z, alpha);
 
-                    glDisable(GL_LIGHT0);
-                    glEnable(GL_LIGHT1);
-                    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, SUN_COLOR);
-                    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, ZERO);
-
                     glVertex3f(particles[i].trail[j].x, particles[i].trail[j].y, particles[i].trail[j].z);
-
-                   	glDisable(GL_LIGHT1);
-                    float sun_diffuse[] = {sun_color.x, sun_color.y, sun_color.z, 1.0f};
-                    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, sun_diffuse);
-                    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, ZERO);
-                    glLightfv(GL_LIGHT0, GL_DIFFUSE, sun_diffuse);
-                    glEnable(GL_LIGHT0);
                 }
+                glVertex3f(particles[i].position.x, particles[i].position.y, particles[i].position.z);
                 glEnd();
             }
         }
+       	glDisable(GL_LIGHT1);
+        float sun_diffuse[] = {sun_color.x, sun_color.y, sun_color.z, 1.0f};
+        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, sun_diffuse);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, ZERO);
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, sun_diffuse);
+        glEnable(GL_LIGHT0);
 
         glDepthMask(GL_TRUE);
         glDisable(GL_BLEND);
