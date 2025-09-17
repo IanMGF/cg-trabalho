@@ -8,12 +8,30 @@
 #include <ctime>
 #include "body.cpp"
 
+
 #define C_LENGHT 7
 #define G 6.67430e-11
 #define DELTA 2
 
 int steps = 100;
 int factor = 1000;
+
+struct SupernovaParticle {
+    Vec3 position;          // Posição atual no espaço 3D
+    Vec3 color;             // Cor da partícula
+    float lifetime;         // Tempo de vida restante
+    float age;              // Idade atual
+
+    // Curva Bézier cúbica
+    Vec3 p0, p1, p2, p3;   // Pontos de controle
+    float t;                // Parâmetro da curva (0 a 1)
+    float speed;            // Velocidade ao longo da curva
+
+    std::vector<Vec3> trail; // histórico de posições
+};
+
+const int NUM_PARTICLES = 2000;
+SupernovaParticle particles[NUM_PARTICLES];
 
 struct dark_bramble_cylinder{
     GLdouble x;
@@ -50,14 +68,35 @@ GLfloat fAspect;
 
 std::vector<Body> bodies = std::vector<Body>();
 
+void reset_supernova() {
+    for (int i = 0; i < NUM_PARTICLES; i++) {
+        particles[i].age = 0.0f;
+        particles[i].lifetime = 2.0f + ((float)rand()) / (RAND_MAX / 3.0f); // 2 a 5 segs
+        particles[i].t = 0.0f;
+        particles[i].speed = 0.5f + ((float)rand()) / (RAND_MAX / 1.5f);
+
+        // Posição inicial no Sol
+        Vec3 center = bodies[0].position;
+
+        // Define pontos de controle para curvas Bézier saindo do Sol
+        particles[i].p0 = center;
+        particles[i].p1 = center + Vec3(rand()%750 - 250, rand()%750 - 250, rand()%750 - 250);
+        particles[i].p2 = center + Vec3(rand()%1500 - 500, rand()%1500 - 500, rand()%1500 - 500);
+        particles[i].p3 = center + Vec3(rand()%3000 - 1000, rand()%3000 - 1000, rand()%3000 - 1000);
+
+        // Cor inicial
+        particles[i].color = Vec3(1, 1, 1);
+    }
+}
+
 void physics_setup() {
     Body comet = Body(500, Vec3(0, 0, 100000), 5.5E+6, Vec3(0.13, 0.48, 0.62), Vec3(0, 0, 0));
     float semi_major_axis = 60000.0;
     float inv_a = 1 / semi_major_axis;
     float initial_speed = std::sqrt(G * (comet.mass + sun_mass) * (2 / 100000.0 - inv_a));
-    
+
     comet.velocity = Vec3(initial_speed, 0, 0);
-    
+
     bodies.push_back(Body(2000, 0, sun_mass, sun_color));
     bodies.push_back(Body(169, Vec3(-250, 0, 5000), 1.6E+6, Vec3(0.85, 0.31, 0.11), Vec3(0.07307147186145904, 0, 0)));
     bodies.push_back(Body(170, Vec3(250, 0, 5000), 1.6E+6, Vec3(0.89, 0.62, 0.29), Vec3(0.07307147186145904, 0, 0)));
@@ -69,6 +108,37 @@ void physics_setup() {
     bodies.push_back(Body(800, 20000, 3.25E+6, Vec3(0.3, 0.13, 0.12)));
     bodies.push_back(comet);
 };
+
+void update_particles(float delta_time) {
+    for (int i = 0; i < NUM_PARTICLES; i++) {
+        SupernovaParticle &p = particles[i];
+
+        if (p.lifetime > 0) {
+            // Atualiza idade e vida restante
+            p.age += delta_time;
+            p.lifetime -= delta_time;
+
+            // Atualiza o parâmetro t da curva Bézier
+            p.t += p.speed * delta_time;
+            if (p.t > 1.0f) p.t = 1.0f; // não ultrapassa o final da curva
+
+            // Calcula posição atual na curva de Bézier cúbica
+            float u = 1.0f - p.t;
+            Vec3 pos =
+                p.p0 * (u*u*u) +
+                p.p1 * (3*u*u*p.t) +
+                p.p2 * (3*u*p.t*p.t) +
+                p.p3 * (p.t*p.t*p.t);
+
+            p.position = pos * sun_scale + bodies[0].position; // escala e centraliza no Sol
+
+            // Armazena posição para a linha (flare)
+            p.trail.push_back(p.position);
+            if (p.trail.size() > 20) p.trail.erase(p.trail.begin()); // limite de pontos
+        }
+    }
+}
+
 
 void update(int _) {
     float effective_delta = DELTA * factor * 0.001;
@@ -118,6 +188,8 @@ void update(int _) {
         }
         bodies[0].mass = sun_mass;
         bodies[0].color = sun_color;
+
+        update_particles(effective_delta);
     }
     glutPostRedisplay();
     glutTimerFunc(DELTA, update, 0);
@@ -135,7 +207,6 @@ void draw(void) {
 		    const float ONES[] = {1.0f, 1.0f, 1.0f, 1.0f};
 			const float ZERO[] = {0.0f, 0.0f, 0.0f, 1.0f};
 			const float SUN_COLOR[] = { sun_color.x, sun_color.y, sun_color.z, 1.0f };
-		
 			if (i == 0) {
 				glDisable(GL_LIGHT0);
 				glEnable(GL_LIGHT1);
@@ -227,6 +298,44 @@ void draw(void) {
         glScalef(1/4.0, 1/4.0, 1/4.0);
         glTranslated(0, 0, 125);
     glPopMatrix();
+
+    if (sun_explosion_step != 0) {
+        const float ZERO[] = {0.0f, 0.0f, 0.0f, 1.0f};
+		const float SUN_COLOR[] = { sun_color.x, sun_color.y, sun_color.z, 1.0f };
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glLineWidth(2.0f);
+        glDepthMask(GL_FALSE);
+
+        for (int i = 0; i < NUM_PARTICLES; i++) {
+            if (particles[i].lifetime > 0 && !particles[i].trail.empty()) {
+                glBegin(GL_LINE_STRIP);
+                for (int j = 0; j < particles[i].trail.size(); j++) {
+                    float alpha = (float)j / particles[i].trail.size(); // fade da ponta
+                    glColor4f(sun_color.x, sun_color.y, sun_color.z, alpha);
+
+                    glDisable(GL_LIGHT0);
+                    glEnable(GL_LIGHT1);
+                    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, SUN_COLOR);
+                    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, ZERO);
+
+                    glVertex3f(particles[i].trail[j].x, particles[i].trail[j].y, particles[i].trail[j].z);
+
+                   	glDisable(GL_LIGHT1);
+                    float sun_diffuse[] = {sun_color.x, sun_color.y, sun_color.z, 1.0f};
+                    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, sun_diffuse);
+                    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, ZERO);
+                    glLightfv(GL_LIGHT0, GL_DIFFUSE, sun_diffuse);
+                    glEnable(GL_LIGHT0);
+                }
+                glEnd();
+            }
+        }
+
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+    }
 
 	glutSwapBuffers();
 }
@@ -341,8 +450,10 @@ void keyboard_callback(unsigned char key_code, int x, int y) {
 			break;
 
 		case 'x':
-		    if(sun_explosion_step == 0)
+		    if(sun_explosion_step == 0){
                 sun_explosion_step = 1;
+                reset_supernova();
+			}
             break;
 	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   //aplica o zBuffer
