@@ -306,7 +306,7 @@ void draw(void) {
 
             glRotated(cylinders[i].angle_rotation, cylinders[i].x, cylinders[i].y, 0);
 
-            gluCylinder(quad, 25, 25, 300, 20, 20);
+            gluCylinder(quad, 25, 25, cylinders[i].height, 20, 20);
 
             glTranslated(0, 0, cylinders[i].height);
             glScaled(cylinders[i].scale_factor.x, cylinders[i].scale_factor.y, cylinders[i].scale_factor.z);
