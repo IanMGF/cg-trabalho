@@ -428,6 +428,7 @@ void setup(void)
     glLightfv(GL_LIGHT1, GL_EMISSION, ONES);
 
     glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_NORMALIZE);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_DEPTH_TEST);
