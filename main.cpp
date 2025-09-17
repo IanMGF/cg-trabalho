@@ -84,11 +84,11 @@ SupernovaParticle generate_particle(void) {
 
     float escape_elevation = 2 * M_PI * ((float) rand() / RAND_MAX);
     float escape_azimuth = 2 * M_PI * ((float) rand() / RAND_MAX);
-    
+
     std::random_device rd;
     std::mt19937 generator(rd());
     std::normal_distribution<double> standard_normal_dist(0.0, 1.0);
-    
+
     Vec3 midpoint = Vec3(
         standard_normal_dist(generator),
         standard_normal_dist(generator),
@@ -96,7 +96,7 @@ SupernovaParticle generate_particle(void) {
     ).unitary() * distance_from_sun / 2;
     Vec3 surface_point = midpoint.unitary() * bodies[0].radius;
     Vec3 far_point = midpoint * 2;
-    
+
     // Generate a pull point perpendicular to the midpoint
     Vec3 aux_vec = midpoint + Vec3(
         -midpoint.x,
@@ -141,7 +141,7 @@ void physics_setup() {
     bodies.push_back(Body(254, 8600, 3E+7, Vec3(0.22, 0.38, 0.27)));
     bodies.push_back(Body(80, Vec3(900, 0, 8600), 5E+5, Vec3(0.62, 0.49, 0.42), Vec3(0.0557164, 0, 0.001491565173)));
     bodies.push_back(Body(272, 11700, 3E+7, Vec3(0.31, 0.26, 0.34)));
-    bodies.push_back(Body(97, Vec3(1000, 0, 11700), 9.1E+5, Vec3(1, 0.75, 0.13), Vec3(0.04776831, 0, 0.001415022)));
+    bodies.push_back(Body(97, Vec3(1000, 0, 11700), 9.1E+5, Vec3(0.8, 0.3, 0.13), Vec3(0.04776831, 0, 0.001415022)));
     bodies.push_back(Body(500, 16460, 2.2E+7, Vec3(0.11, 0.42, 0.27)));
     bodies.push_back(Body(800, 20000, 3.25E+6, Vec3(0.3, 0.13, 0.12)));
     bodies.push_back(comet);
@@ -251,12 +251,18 @@ void draw(void) {
 		    const float ONES[] = {1.0f, 1.0f, 1.0f, 1.0f};
 			const float ZERO[] = {0.0f, 0.0f, 0.0f, 1.0f};
 			const float SUN_COLOR[] = { sun_color.x, sun_color.y, sun_color.z, 1.0f };
+			const float COLOR[] = { 0.8, 0.3, 0.13, 1.0f };
 			if (i == 0) {
 				glDisable(GL_LIGHT0);
 				glEnable(GL_LIGHT1);
 				glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, SUN_COLOR);
 				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, ZERO);
 			    glScalef(sun_scale, sun_scale, sun_scale);
+			} else if (i == 6) {
+                glDisable(GL_LIGHT0);
+                glEnable(GL_LIGHT1);
+                glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, COLOR);
+                glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, ZERO);
 			}
 
 			glutSolidSphere(body.radius, 100, 100);
@@ -268,6 +274,12 @@ void draw(void) {
 				glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, ZERO);
 				glLightfv(GL_LIGHT0, GL_DIFFUSE, sun_diffuse);
 				glEnable(GL_LIGHT0);
+			} else if (i == 6) {
+                glDisable(GL_LIGHT1);
+    			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, COLOR);
+    			glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, ZERO);
+    			glLightfv(GL_LIGHT0, GL_DIFFUSE, COLOR);
+    			glEnable(GL_LIGHT0);
 			}
 		glPopMatrix();
 	}
@@ -309,6 +321,14 @@ void draw(void) {
             glRotated(-cylinders[i].angle_rotation, cylinders[i].x, cylinders[i].y, 0);
         }
 
+        const float ZERO[] = {0.0f, 0.0f, 0.0f, 1.0f};
+		const float COLOR[] = { 0.64, 0.64, 0.64, 0.6f };
+
+        glDisable(GL_LIGHT0);
+        glEnable(GL_LIGHT1);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, COLOR);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, ZERO);
+
         glColor3f(0.64, 0.64, 0.64);
 
         // esfera 1
@@ -341,12 +361,16 @@ void draw(void) {
         glutSolidSphere(100, 50, 50);
         glScalef(1/4.0, 1/4.0, 1/4.0);
         glTranslated(0, 0, 125);
+
+        glDisable(GL_LIGHT1);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, COLOR);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, ZERO);
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, COLOR);
+        glEnable(GL_LIGHT0);
     glPopMatrix();
 
     if (sun_explosion_step != 0) {
-        const float ZERO[] = {0.0f, 0.0f, 0.0f, 1.0f};
-		const float SUN_COLOR[] = { sun_color.x, sun_color.y, sun_color.z, 1.0f };
-
+        const float SUN_COLOR[] = { sun_color.x, sun_color.y, sun_color.z, 1.0f };
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         if (sun_explosion_step < 3)
