@@ -20,6 +20,10 @@ class Vec3 {
         Vec3 operator/(float scale) const {
             return Vec3(x / scale, y / scale, z / scale);
         }
+        
+        Vec3 operator-() const {
+            return Vec3(-x, -y, -z);
+        }
 
         float length() const {
             return sqrt(x * x + y * y + z * z);
